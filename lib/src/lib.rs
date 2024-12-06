@@ -221,11 +221,8 @@ impl ExceptionAction {
     /// Returns whether this action has a destuctor reference or not.
     pub fn has_dtor_ref(&self) -> bool {
         match self.action_type {
-            ExAction::EndOfList => {
-                println!("Warning: null action passed");
-                false
-            }
-            ExAction::Branch
+            ExAction::EndOfList
+            | ExAction::Branch
             | ExAction::CatchBlock
             | ExAction::ActiveCatchBlock
             | ExAction::Terminate
@@ -626,26 +623,26 @@ impl ExceptionTableData {
                 match exaction_data {
                     ExActionData::EndOfList => {}
                     ExActionData::Branch { target_offset } => {
-                        line += format!("Action: {target_offset:06X}").as_str();
+                        line += format!("Action: {target_offset:06X}\n").as_str();
                     }
                     ExActionData::DestroyLocal { local_offset, .. } => {
-                        line += format!("Local: {local_offset:#X}({local_reg_string})").as_str();
+                        line += format!("Local: {local_offset:#X}({local_reg_string})\n").as_str();
                     }
                     ExActionData::DestroyLocalCond {
                         condition,
                         local_offset,
                         ..
                     } => {
-                        line += format!("Local: {local_offset:#X}({local_reg_string})").as_str();
+                        line += format!("Local: {local_offset:#X}({local_reg_string})\n").as_str();
 
                         //The action param is used to determine the type of reference for the condition (0: local offset, 1: register)
                         if action.action_param == 0 {
                             //Local offset
-                            line += format!("\nCond: {condition:#X}({local_reg_string})").as_str();
+                            line += format!("Cond: {condition:#X}({local_reg_string})\n").as_str();
                         } else {
                             //Register
                             //In this case, the local offset param is actually the register number
-                            line += format!("\nCond: r{condition}").as_str();
+                            line += format!("Cond: r{condition}\n").as_str();
                         }
                     }
                     ExActionData::DestroyLocalPointer { local_pointer, .. } => {
@@ -653,10 +650,10 @@ impl ExceptionTableData {
                         if mode == 0 {
                             //Local offset
                             line +=
-                                format!("Pointer: {local_pointer:#X}({local_reg_string})").as_str();
+                                format!("Pointer: {local_pointer:#X}({local_reg_string})\n").as_str();
                         } else {
                             //Register
-                            line += format!("Pointer: r{local_pointer}").as_str();
+                            line += format!("Pointer: r{local_pointer}\n").as_str();
                         }
                     }
                     ExActionData::DestroyLocalArray {
@@ -665,7 +662,7 @@ impl ExceptionTableData {
                         element_size,
                         ..
                     } => {
-                        line += format!("Array: {local_array:#X}({local_reg_string})\nElements: {elements}\nSize: {element_size}").as_str();
+                        line += format!("Array: {local_array:#X}({local_reg_string})\nElements: {elements}\nSize: {element_size}\n").as_str();
                     }
                     ExActionData::DestroyBase {
                         object_pointer,
@@ -674,10 +671,10 @@ impl ExceptionTableData {
                     } => {
                         let mode = action.action_param >> 7;
                         if mode == 0 {
-                            line += format!("Member: {object_pointer:#X}({local_reg_string})+{member_offset:#X}").as_str();
+                            line += format!("Member: {object_pointer:#X}({local_reg_string})+{member_offset:#X}\n").as_str();
                         } else {
                             line +=
-                                format!("Member: {member_offset:#X}(r{object_pointer})").as_str();
+                                format!("Member: {member_offset:#X}(r{object_pointer})\n").as_str();
                         }
                     }
                     ExActionData::DestroyMember {
@@ -687,10 +684,10 @@ impl ExceptionTableData {
                     } => {
                         let mode = action.action_param >> 7;
                         if mode == 0 {
-                            line += format!("Member: {object_pointer:#X}({local_reg_string})+{member_offset:#X}").as_str();
+                            line += format!("Member: {object_pointer:#X}({local_reg_string})+{member_offset:#X}\n").as_str();
                         } else {
                             line +=
-                                format!("Member: {member_offset:#X}(r{object_pointer})").as_str();
+                                format!("Member: {member_offset:#X}(r{object_pointer})\n").as_str();
                         }
                     }
                     ExActionData::DestroyMemberCond {
@@ -701,19 +698,19 @@ impl ExceptionTableData {
                     } => {
                         let mode = (action.action_param >> 6) & 1;
                         if mode == 0 {
-                            line += format!("Member: {object_pointer:#X}({local_reg_string})+{member_offset:#X}").as_str();
+                            line += format!("Member: {object_pointer:#X}({local_reg_string})+{member_offset:#X}\n").as_str();
                         } else {
                             //Register
                             line +=
-                                format!("Member: {member_offset:#X}(r{object_pointer})").as_str();
+                                format!("Member: {member_offset:#X}(r{object_pointer})\n").as_str();
                         }
                         let condition_mode = action.action_param >> 7;
                         if condition_mode == 0 {
                             //Local offset
-                            line += format!("\nCond: {condition:#X}({local_reg_string})").as_str();
+                            line += format!("Cond: {condition:#X}({local_reg_string})\n").as_str();
                         } else {
                             //Register
-                            line += format!("\nCond: r{condition}").as_str();
+                            line += format!("Cond: r{condition}\n").as_str();
                         }
                     }
                     ExActionData::DestroyMemberArray {
@@ -727,25 +724,25 @@ impl ExceptionTableData {
                         if mode == 0 {
                             //Local offset
                             line += format!(
-                                "Member: {object_pointer:#X}({local_reg_string})+0x{member_offset}"
+                                "Member: {object_pointer:#X}({local_reg_string})+0x{member_offset}\n"
                             )
                             .as_str();
                         } else {
                             //Register
                             line +=
-                                format!("Member: {member_offset:#X}(r{object_pointer})").as_str();
+                                format!("Member: {member_offset:#X}(r{object_pointer})\n").as_str();
                         }
-                        line += format!("\nElements: {elements}\nSize: {element_size}").as_str();
+                        line += format!("Elements: {elements}\nSize: {element_size}\n").as_str();
                     }
                     ExActionData::DeletePointer { object_pointer, .. } => {
                         let mode = action.action_param >> 7;
                         if mode == 0 {
                             //Local offset
-                            line += format!("Pointer: {object_pointer:#X}({local_reg_string})")
+                            line += format!("Pointer: {object_pointer:#X}({local_reg_string})\n")
                                 .as_str();
                         } else {
                             //Register
-                            line += format!("Pointer: r{object_pointer})").as_str();
+                            line += format!("Pointer: r{object_pointer})\n").as_str();
                         }
                     }
                     ExActionData::DeletePointerCond {
@@ -756,19 +753,19 @@ impl ExceptionTableData {
                         let mode = (action.action_param >> 6) & 1;
                         if mode == 0 {
                             //Local offset
-                            line += format!("Pointer: {object_pointer:#X}({local_reg_string})")
+                            line += format!("Pointer: {object_pointer:#X}({local_reg_string})\n")
                                 .as_str();
                         } else {
                             //Register
-                            line += format!("Pointer: r{object_pointer})").as_str();
+                            line += format!("Pointer: r{object_pointer})\n").as_str();
                         }
                         let condition_mode = action.action_param >> 7;
                         if condition_mode == 0 {
                             //Local offset
-                            line += format!("\nCond: {condition:#X}({local_reg_string})").as_str();
+                            line += format!("Cond: {condition:#X}({local_reg_string})\n").as_str();
                         } else {
                             //Register
-                            line += format!("\nCond: r{condition}").as_str();
+                            line += format!("Cond: r{condition}\n").as_str();
                         }
                     }
                     ExActionData::CatchBlock {
@@ -777,10 +774,10 @@ impl ExceptionTableData {
                         cinfo_ref,
                         ..
                     } => {
-                        line += format!("Local: {cinfo_ref:#X}({local_reg_string})\nPC: {catch_pc_offset:08X}\ncatch_type_addr: {catch_type:08X}").as_str();
+                        line += format!("Local: {cinfo_ref:#X}({local_reg_string})\nPC: {catch_pc_offset:08X}\ncatch_type_addr: {catch_type:08X}\n").as_str();
                     }
                     ExActionData::ActiveCatchBlock { cinfo_ref } => {
-                        line += format!("Local: {cinfo_ref:#X}({local_reg_string})").as_str();
+                        line += format!("Local: {cinfo_ref:#X}({local_reg_string})\n").as_str();
                     }
                     ExActionData::Terminate => {}
                     ExActionData::Specification {
@@ -789,7 +786,7 @@ impl ExceptionTableData {
                         cinfo_ref,
                         ..
                     } => {
-                        line += format!("Local: {cinfo_ref:#X}({local_reg_string})\nPC: {pc_offset:08X}\nTypes: {specs}").as_str();
+                        line += format!("Local: {cinfo_ref:#X}({local_reg_string})\nPC: {pc_offset:08X}\nTypes: {specs}\n").as_str();
                     }
                     ExActionData::CatchBlock32 {
                         catch_type,
@@ -797,7 +794,7 @@ impl ExceptionTableData {
                         cinfo_ref,
                         ..
                     } => {
-                        line += format!("Local: {cinfo_ref:#X}({local_reg_string})\nPC: {catch_pc_offset:08X}\ncatch_type_addr: {catch_type:08X}").as_str();
+                        line += format!("Local: {cinfo_ref:#X}({local_reg_string})\nPC: {catch_pc_offset:08X}\ncatch_type_addr: {catch_type:08X}\n").as_str();
                     }
                 }
 
@@ -808,14 +805,13 @@ impl ExceptionTableData {
                         return None;
                     }
                     let func_name = func_names[func_index].as_str();
-                    line += format!("\nDtor: \"{func_name}\"").as_str();
+                    line += format!("Dtor: \"{func_name}\"\n").as_str();
                     func_index += 1;
                 }
 
                 if action.has_end_bit {
-                    line += "."
-                }; //Add a dot to the end if the has end bit flag is set
-                line += "\n";
+                    line += "Has end bit\n"
+                };
                 sb += line.as_str(); //Print the line
             }
         }
